@@ -29,7 +29,7 @@
 
 Este documento define las métricas estándar que deben monitorearse para cada servicio de AWS en nuestras cargas de trabajo. Estas métricas han sido seleccionadas como línea base para garantizar la observabilidad completa de la infraestructura.
 
-**Servicios cubiertos**: 20 servicios principales de AWS incluyendo cómputo, almacenamiento, bases de datos, redes, seguridad y analytics.
+> **⚠️ Nota Importante**: Las métricas y umbrales presentados en este documento son **valores de referencia**. Deben ser ajustados y validados según las necesidades específicas, patrones de uso y SLAs de cada proyecto.
 
 ---
 
