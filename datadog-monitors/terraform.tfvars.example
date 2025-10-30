@@ -1,0 +1,55 @@
+# Datadog Configuration
+datadog_api_key = "your-datadog-api-key"
+datadog_app_key = "your-datadog-app-key"
+
+# Project Configuration
+environment  = "dev"
+project_name = "my-project"
+
+# Notification Channels
+notification_channels = [
+  "@slack-alerts",
+  "@email-team@company.com"
+]
+
+critical_notification_channels = [
+  "@slack-critical",
+  "@pagerduty-oncall",
+  "@email-oncall@company.com"
+]
+
+warning_notification_channels = [
+  "@slack-warnings",
+  "@email-team@company.com"
+]
+
+# Tags
+tags = [
+  "team:cloudops",
+  "owner:infrastructure"
+]
+
+# Global Monitor Control
+enable_monitors = true
+
+# Service-specific Controls
+enable_ec2_monitors               = true
+enable_cloudfront_monitors        = true
+enable_alb_monitors              = true
+enable_rds_monitors              = true
+enable_aurora_monitors           = true
+enable_aurora_serverless_monitors = false
+enable_s3_monitors               = true
+enable_dynamodb_monitors         = true
+enable_lambda_monitors           = true
+enable_efs_monitors              = false
+enable_ebs_monitors              = true
+enable_fsx_monitors              = false
+enable_waf_monitors              = true
+enable_redshift_monitors         = false
+enable_glue_monitors             = false
+enable_elasticache_monitors      = true
+enable_eks_monitors              = true
+enable_ecs_monitors              = true
+enable_fargate_monitors          = false
+enable_api_gateway_monitors      = true
