@@ -31,6 +31,65 @@ Este documento define las métricas estándar que deben monitorearse para cada s
 
 > **⚠️ Nota Importante**: Las métricas y umbrales presentados en este documento son **valores de referencia**. Deben ser ajustados y validados según las necesidades específicas, patrones de uso y SLAs de cada proyecto.
 
+## 🔧 Implementaciones Disponibles
+
+Este repositorio incluye **DOS implementaciones completas** basadas en todas las métricas definidas en este documento:
+
+### 🎯 Opción 1: Datadog + Terraform
+📁 **Ubicación**: [`./datadog-monitors/`](./datadog-monitors/)
+
+**Características:**
+- ✅ **20 servicios AWS** completamente implementados
+- ✅ **120+ monitores** Datadog funcionales
+- ✅ **Estructura modular** por servicio AWS
+- ✅ **Variables personalizables** para umbrales
+- ✅ **Canales de notificación** configurables
+- ✅ **Tags automáticos** para organización
+
+**Inicio Rápido:**
+```bash
+cd datadog-monitors
+make setup
+# Editar terraform.tfvars con tus credenciales
+make deploy
+```
+
+### 🎯 Opción 2: AWS CloudWatch + AWS CLI
+📁 **Ubicación**: [`./aws-alarms/`](./aws-alarms/)
+
+**Características:**
+- ✅ **20 servicios AWS** completamente implementados
+- ✅ **120+ alarmas CloudWatch** nativas
+- ✅ **Scripts modulares** por servicio AWS
+- ✅ **Umbrales configurables** por métrica
+- ✅ **SNS topics** para notificaciones
+- ✅ **Configuración centralizada** en variables
+
+**Inicio Rápido:**
+```bash
+cd aws-alarms
+make setup
+# Editar config/config.env con tus configuraciones
+make deploy
+```
+
+### 📊 Comparación de Implementaciones
+
+| Característica | Datadog-Terraform | AWS CloudWatch-CLI |
+|----------------|-------------------|--------------------|
+| **Servicios AWS** | 20/20 ✅ | 20/20 ✅ |
+| **Plataforma** | Datadog (SaaS) | AWS CloudWatch (Nativo) |
+| **Infraestructura como Código** | Terraform | Bash Scripts + AWS CLI |
+| **Costo** | Licencia Datadog | Solo costos AWS |
+| **Dashboards** | Datadog UI | AWS Console |
+| **Alertas** | Datadog Notifications | SNS Topics |
+| **Umbrales** | Configurables | Configurables |
+| **Mantenimiento** | `terraform apply` | `make deploy` |
+
+### 🔗 Documentación Detallada
+- 📖 **Datadog**: [IMPLEMENTATION_GUIDE.md](./datadog-monitors/IMPLEMENTATION_GUIDE.md)
+- 📖 **CloudWatch**: [README.md](./aws-alarms/README.md)
+
 ---
 
 ## EC2 - Elastic Compute Cloud
@@ -616,6 +675,19 @@ Este documento define las métricas estándar que deben monitorearse para cada s
 - Documentar falsos positivos y ajustar umbrales accordingly
 - Actualizar baseline tras cambios significativos en la arquitectura
 - Validar umbrales después de escalamientos o migraciones
+
+---
+
+## 🔗 Recursos Relacionados
+
+### Implementaciones
+- 🏗️ **[Monitores Datadog-Terraform](./datadog-monitors/)**: Implementación completa de todos los monitores
+- 📖 **[Guía de Implementación](./datadog-monitors/IMPLEMENTATION_GUIDE.md)**: Instrucciones detalladas paso a paso
+
+### Documentación Técnica
+- 📊 **[Métricas por Servicio](#índice)**: Definiciones completas en este documento
+- ⚙️ **[Variables de Configuración](./datadog-monitors/variables.tf)**: Variables globales personalizables
+- 🎯 **[Umbrales Recomendados](#umbrales-recomendados)**: Guía de configuración de alertas
 
 ---
 
