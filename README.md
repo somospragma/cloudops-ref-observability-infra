@@ -37,23 +37,17 @@ Este repositorio incluye **DOS implementaciones completas** basadas en todas las
 
 ### 🎯 Opción 1: Datadog + Terraform
 📁 **Ubicación**: [`cloudops-ref-repo-datadog-monitors-terraform`](https://github.com/somospragma/cloudops-ref-repo-datadog-monitors-terraform)
-)
 
 **Características:**
-- ✅ **20 servicios AWS** completamente implementados
-- ✅ **120+ monitores** Datadog funcionales
-- ✅ **Estructura modular** por servicio AWS
-- ✅ **Variables personalizables** para umbrales
-- ✅ **Canales de notificación** configurables
-- ✅ **Tags automáticos** para organización
-
-**Inicio Rápido:**
-```bash
-cd datadog-monitors
-make setup
-# Editar terraform.tfvars con tus credenciales
-make deploy
-```
+- ✅ Creación de múltiples monitors mediante `for_each`
+- ✅ Nomenclatura estándar enterprise (`{client}-{project}-{environment}-monitor-{key}`)
+- ✅ Sistema de etiquetado de dos niveles (gobernanza + específicos)
+- ✅ Soporte para diferentes tipos de monitors (metric alert, log alert, service check, etc.)
+- ✅ Configuración de thresholds (critical, warning, recovery)
+- ✅ Gestión de notificaciones y re-notificaciones
+- ✅ Configuración de alertas por falta de datos (no_data)
+- ✅ Tags personalizables por monitor
+- ✅ Outputs granulares de IDs y nombres
 
 ### 🎯 Opción 2: AWS CloudWatch + AWS CLI
 📁 **Ubicación**: [`./aws-alarms/`](./aws-alarms/)
