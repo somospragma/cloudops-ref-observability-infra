@@ -36,7 +36,8 @@ Este documento define las métricas estándar que deben monitorearse para cada s
 Este repositorio incluye **DOS implementaciones completas** basadas en todas las métricas definidas en este documento:
 
 ### 🎯 Opción 1: Datadog + Terraform
-📁 **Ubicación**: [`./datadog-monitors/`](./datadog-monitors/)
+📁 **Ubicación**: [`cloudops-ref-repo-datadog-monitors-terraform`](https://github.com/somospragma/cloudops-ref-repo-datadog-monitors-terraform)
+)
 
 **Características:**
 - ✅ **20 servicios AWS** completamente implementados
