@@ -23,14 +23,14 @@ log_info "Region: $AWS_REGION"
 # Validate SNS topics
 log_info "Validating SNS topics..."
 if ! validate_sns_topic "$SNS_TOPIC_CRITICAL"; then
-    log_error "Critical SNS topic is not accessible: $SNS_TOPIC_CRITICAL"
-    log_info "Please create the SNS topic or update the configuration"
+    log_error "Critical SNS topic does not exist: $SNS_TOPIC_CRITICAL"
+    log_info "Create it with: aws sns create-topic --name <sns-topic-name> --profile $AWS_PROFILE --region $AWS_REGION"
     exit 1
 fi
 
 if ! validate_sns_topic "$SNS_TOPIC_WARNING"; then
-    log_error "Warning SNS topic is not accessible: $SNS_TOPIC_WARNING"
-    log_info "Please create the SNS topic or update the configuration"
+    log_error "Warning SNS topic does not exist: $SNS_TOPIC_WARNING"
+    log_info "Create it with: aws sns create-topic --name <sns-topic-name> --profile $AWS_PROFILE --region $AWS_REGION"
     exit 1
 fi
 

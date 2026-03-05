@@ -55,16 +55,20 @@ Este repositorio incluye **DOS implementaciones completas** basadas en todas las
 **Características:**
 - ✅ **20 servicios AWS** completamente implementados
 - ✅ **120+ alarmas CloudWatch** nativas
+- ✅ **Soporte AWS SSO** con perfiles configurables
+- ✅ **Filtrado por nivel de severidad** (Critical/Warning/Info)
 - ✅ **Scripts modulares** por servicio AWS
 - ✅ **Umbrales configurables** por métrica
 - ✅ **SNS topics** para notificaciones
 - ✅ **Configuración centralizada** en variables
+- ✅ **Script de testing** para simular despliegues
 
 **Inicio Rápido:**
 ```bash
 cd aws-alarms
 make setup
 # Editar config/config.env con tus configuraciones
+# Crear SNS topics requeridos
 make deploy
 ```
 

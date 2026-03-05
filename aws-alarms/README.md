@@ -6,12 +6,15 @@ Esta implementación crea **93 alarmas de CloudWatch** usando AWS CLI basadas en
 
 - ✅ **20 servicios AWS** completamente implementados
 - ✅ **93 alarmas CloudWatch** nativas
+- ✅ **Soporte AWS SSO** con perfiles configurables
+- ✅ **Filtrado por nivel de severidad** (Critical/Warning/Info)
 - ✅ **Manejo correcto de datos faltantes** (`TreatMissingData: missing`)
 - ✅ **Scripts modulares** por servicio AWS
 - ✅ **Umbrales configurables** por métrica
 - ✅ **SNS topics** para notificaciones
 - ✅ **Configuración centralizada** en variables
 - ✅ **Validación automática** de estado de alarmas
+- ✅ **Script de testing** para simular despliegues
 
 ## 🚀 Inicio Rápido
 
@@ -34,21 +37,40 @@ vim config/config.env
 Edita `config/config.env` con tus valores:
 ```bash
 # Configuración AWS
-AWS_PROFILE="chapter"              # Tu perfil AWS
+AWS_PROFILE="chapter"              # Tu perfil AWS (soporta AWS SSO)
 AWS_REGION="us-east-1"            # Tu región
 
 # Configuración del proyecto
 PROJECT_NAME="observability-demo"
 ENVIRONMENT="test"
 
+# Control de Niveles de Severidad
+DEPLOY_CRITICAL_ALARMS=true       # Desplegar alarmas Critical
+DEPLOY_WARNING_ALARMS=true        # Desplegar alarmas Warning
+DEPLOY_INFO_ALARMS=false          # Desplegar alarmas Info
+
 # SNS Topics (deben existir previamente)
 SNS_TOPIC_CRITICAL="arn:aws:sns:us-east-1:840021737375:cloudwatch-alarms-critical"
 SNS_TOPIC_WARNING="arn:aws:sns:us-east-1:840021737375:cloudwatch-alarms-warning"
 ```
 
-### 3. Desplegar Alarmas
+### 3. Crear SNS Topics
 ```bash
-# Desplegar TODAS las 93 alarmas (recomendado)
+# Los SNS topics deben existir antes del despliegue
+aws sns create-topic --name <sns-topic-name> --profile chapter --region us-east-1
+
+# Actualiza los ARNs en config/config.env
+```
+
+### 4. Probar Configuración (Opcional)
+```bash
+# Simular qué alarmas se crearían según tu configuración
+./test-alarm-levels.sh
+```
+
+### 5. Desplegar Alarmas
+```bash
+# Desplegar TODAS las alarmas (respeta configuración de niveles)
 make deploy
 # O manualmente:
 ./deploy-all.sh
@@ -58,7 +80,7 @@ bash scripts/ec2/deploy-ec2-alarms.sh
 bash scripts/rds/deploy-rds-alarms.sh
 ```
 
-### 4. Validar Despliegue
+### 6. Validar Despliegue
 ```bash
 # Validar estado de todas las alarmas
 make validate-alarms
@@ -109,7 +131,7 @@ aws-alarms/
 # ========================================
 # CONFIGURACIÓN AWS
 # ========================================
-AWS_PROFILE="chapter"                    # Perfil AWS CLI
+AWS_PROFILE="chapter"                    # Perfil AWS CLI (soporta AWS SSO)
 AWS_REGION="us-east-1"                  # Región AWS
 
 # ========================================
@@ -118,6 +140,13 @@ AWS_REGION="us-east-1"                  # Región AWS
 PROJECT_NAME="observability-demo"       # Nombre del proyecto
 ENVIRONMENT="test"                      # Ambiente (dev/test/prod)
 ALARM_PREFIX="${PROJECT_NAME}-${ENVIRONMENT}"  # Prefijo de alarmas
+
+# ========================================
+# CONTROL DE NIVELES DE SEVERIDAD
+# ========================================
+DEPLOY_CRITICAL_ALARMS=true             # Desplegar alarmas Critical
+DEPLOY_WARNING_ALARMS=true              # Desplegar alarmas Warning
+DEPLOY_INFO_ALARMS=false                # Desplegar alarmas Info
 
 # ========================================
 # SNS TOPICS PARA NOTIFICACIONES
@@ -147,18 +176,45 @@ ENABLE_LAMBDA_ALARMS=true
 # ... (todos los servicios habilitados por defecto)
 ```
 
+## 🎯 Filtrado por Nivel de Severidad
+
+Controla qué alarmas desplegar según su nivel de severidad en `config/config.env`:
+
+```bash
+# Desplegar solo alarmas críticas
+DEPLOY_CRITICAL_ALARMS=true
+DEPLOY_WARNING_ALARMS=false
+DEPLOY_INFO_ALARMS=false
+
+# Desplegar críticas y warnings (recomendado)
+DEPLOY_CRITICAL_ALARMS=true
+DEPLOY_WARNING_ALARMS=true
+DEPLOY_INFO_ALARMS=false
+```
+
+### Probar Configuración
+```bash
+# Ver qué alarmas se crearían con tu configuración actual
+./test-alarm-levels.sh
+
+# Salida esperada:
+# ✅ WOULD CREATE: demo-EC2-CPU-Critical
+# ⏭️  WOULD SKIP: demo-EC2-CPU-Warning
+```
+
 ### Configuración de SNS Topics
 ```bash
-# Crear topics si no existen
-aws sns create-topic --name cloudwatch-alarms-critical --profile chapter
-aws sns create-topic --name cloudwatch-alarms-warning --profile chapter
+# Crear topics (REQUERIDO antes del despliegue)
+aws sns create-topic --name cloudwatch-alarms-critical --profile chapter --region us-east-1
+aws sns create-topic --name cloudwatch-alarms-warning --profile chapter --region us-east-1
 
 # Suscribir email
 aws sns subscribe \
   --topic-arn "arn:aws:sns:us-east-1:840021737375:cloudwatch-alarms-critical" \
   --protocol email \
   --notification-endpoint admin@company.com \
-  --profile chapter
+  --profile chapter \
+  --region us-east-1
 ```
 
 ## 🔧 Servicios Implementados (93 Alarmas Total)

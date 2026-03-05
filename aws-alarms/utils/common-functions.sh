@@ -41,6 +41,35 @@ check_aws_cli() {
     log_success "AWS CLI is configured and working with profile: $AWS_PROFILE"
 }
 
+# Check if alarm should be created based on severity level
+should_create_alarm() {
+    local alarm_name="$1"
+    
+    # Detect alarm level by suffix in name (exact match at end)
+    if [[ "$alarm_name" == *"-Critical" ]]; then
+        if [[ "$DEPLOY_CRITICAL_ALARMS" == "true" ]]; then
+            return 0
+        else
+            return 1
+        fi
+    elif [[ "$alarm_name" == *"-Warning" ]]; then
+        if [[ "$DEPLOY_WARNING_ALARMS" == "true" ]]; then
+            return 0
+        else
+            return 1
+        fi
+    elif [[ "$alarm_name" == *"-Info" ]]; then
+        if [[ "$DEPLOY_INFO_ALARMS" == "true" ]]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+    
+    # Default: create alarm if it doesn't match any pattern
+    return 0
+}
+
 # Load configuration
 load_config() {
     local config_file="config/config.env"
@@ -69,6 +98,12 @@ create_alarm() {
     local period="${10:-300}"
     local evaluation_periods="${11:-$EVALUATION_PERIODS}"
     local datapoints_to_alarm="${12:-$DATAPOINTS_TO_ALARM}"
+    
+    # Check if this alarm should be created based on severity level
+    if ! should_create_alarm "$alarm_name"; then
+        log_warning "Skipping alarm (disabled by config): $alarm_name"
+        return 0
+    fi
     
     log_info "Creating alarm: $alarm_name"
     
@@ -103,7 +138,10 @@ delete_alarm() {
     
     log_info "Deleting alarm: $alarm_name"
     
-    if aws cloudwatch delete-alarms --alarm-names "$alarm_name"; then
+    if aws cloudwatch delete-alarms \
+        --alarm-names "$alarm_name" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION"; then
         log_success "Deleted alarm: $alarm_name"
         return 0
     else
@@ -116,7 +154,12 @@ delete_alarm() {
 alarm_exists() {
     local alarm_name="$1"
     
-    aws cloudwatch describe-alarms --alarm-names "$alarm_name" --query 'MetricAlarms[0].AlarmName' --output text 2>/dev/null | grep -q "$alarm_name"
+    aws cloudwatch describe-alarms \
+        --alarm-names "$alarm_name" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --query 'MetricAlarms[0].AlarmName' \
+        --output text 2>/dev/null | grep -q "$alarm_name"
 }
 
 # List alarms with prefix
@@ -124,21 +167,34 @@ list_alarms() {
     local prefix="${1:-$ALARM_PREFIX}"
     
     log_info "Listing alarms with prefix: $prefix"
-    aws cloudwatch describe-alarms --alarm-name-prefix "$prefix" --query 'MetricAlarms[*].[AlarmName,StateValue,StateReason]' --output table
+    aws cloudwatch describe-alarms \
+        --alarm-name-prefix "$prefix" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --query 'MetricAlarms[*].[AlarmName,StateValue,StateReason]' \
+        --output table
 }
 
 # Get alarm state
 get_alarm_state() {
     local alarm_name="$1"
     
-    aws cloudwatch describe-alarms --alarm-names "$alarm_name" --query 'MetricAlarms[0].StateValue' --output text 2>/dev/null
+    aws cloudwatch describe-alarms \
+        --alarm-names "$alarm_name" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --query 'MetricAlarms[0].StateValue' \
+        --output text 2>/dev/null
 }
 
 # Validate SNS topic exists
 validate_sns_topic() {
     local topic_arn="$1"
     
-    if aws sns get-topic-attributes --topic-arn "$topic_arn" &>/dev/null; then
+    if aws sns get-topic-attributes \
+        --topic-arn "$topic_arn" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" &>/dev/null; then
         return 0
     else
         log_warning "SNS topic does not exist or is not accessible: $topic_arn"
@@ -152,7 +208,12 @@ create_sns_topic() {
     
     log_info "Creating SNS topic: $topic_name"
     
-    local topic_arn=$(aws sns create-topic --name "$topic_name" --query 'TopicArn' --output text)
+    local topic_arn=$(aws sns create-topic \
+        --name "$topic_name" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --query 'TopicArn' \
+        --output text)
     
     if [[ $? -eq 0 ]]; then
         log_success "Created SNS topic: $topic_arn"
@@ -171,7 +232,12 @@ subscribe_email_to_topic() {
     
     log_info "Subscribing email $email to topic $topic_arn"
     
-    if aws sns subscribe --topic-arn "$topic_arn" --protocol email --notification-endpoint "$email"; then
+    if aws sns subscribe \
+        --topic-arn "$topic_arn" \
+        --protocol email \
+        --notification-endpoint "$email" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION"; then
         log_success "Subscribed $email to $topic_arn"
         log_warning "Please check your email and confirm the subscription"
         return 0
@@ -188,7 +254,11 @@ test_sns_notification() {
     
     log_info "Sending test notification to $topic_arn"
     
-    if aws sns publish --topic-arn "$topic_arn" --message "$message"; then
+    if aws sns publish \
+        --topic-arn "$topic_arn" \
+        --message "$message" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION"; then
         log_success "Test notification sent successfully"
         return 0
     else
@@ -199,12 +269,16 @@ test_sns_notification() {
 
 # Get AWS account ID
 get_account_id() {
-    aws sts get-caller-identity --query 'Account' --output text
+    aws sts get-caller-identity \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --query 'Account' \
+        --output text
 }
 
 # Get current AWS region
 get_current_region() {
-    aws configure get region
+    aws configure get region --profile "$AWS_PROFILE"
 }
 
 # Format dimensions for AWS CLI

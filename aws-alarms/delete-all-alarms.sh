@@ -30,6 +30,8 @@ log_info "Deleting all CloudWatch alarms with prefix: $ALARM_PREFIX"
 # Get all alarm names with the prefix
 alarm_names=$(aws cloudwatch describe-alarms \
     --alarm-name-prefix "$ALARM_PREFIX" \
+    --profile "$AWS_PROFILE" \
+    --region "$AWS_REGION" \
     --query 'MetricAlarms[*].AlarmName' \
     --output text)
 
@@ -62,7 +64,10 @@ for ((i=0; i<total_alarms; i+=batch_size)); do
     batch_alarms=("${alarms_array[@]:$i:$batch_size}")
     
     # Delete batch
-    if aws cloudwatch delete-alarms --alarm-names "${batch_alarms[@]}"; then
+    if aws cloudwatch delete-alarms \
+        --alarm-names "${batch_alarms[@]}" \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION"; then
         log_success "Deleted batch $current_batch successfully"
     else
         log_error "Failed to delete batch $current_batch"
@@ -77,6 +82,8 @@ log_success "All CloudWatch alarms and anomaly detectors deleted successfully!"
 # Verify deletion
 remaining_alarms=$(aws cloudwatch describe-alarms \
     --alarm-name-prefix "$ALARM_PREFIX" \
+    --profile "$AWS_PROFILE" \
+    --region "$AWS_REGION" \
     --query 'MetricAlarms[*].AlarmName' \
     --output text)
 
